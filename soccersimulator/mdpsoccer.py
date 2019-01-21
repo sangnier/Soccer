@@ -104,7 +104,7 @@ class PlayerState(MobileMixin):
     def to_dict(self):
         return {"position":self.position,"vitesse":self.vitesse,"action":self.action,"last_shoot":self.last_shoot}
     def __str__(self):
-        return "pos: %s, vit: %s, action:%s" %(str(self.position),str(self.acceleration),str(self.action))
+        return "pos: %s, vit: %s, action:%s" %(str(self.position),str(self.vitesse),str(self.action))
     def __repr__(self):
         return "PlayerState(position=%s,vitesse=%s,action=%s,last_shoot=%d)" %  \
                             (self.position.__repr__(),self.vitesse.__repr__(),self.action.__repr__(),self.last_shoot)
