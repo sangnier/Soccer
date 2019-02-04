@@ -11,6 +11,7 @@ import traceback
 import logging
 from soccersimulator import SoccerTeam, Strategy, Simulation
 import glob
+import importlib
 
 logger = logging.getLogger("soccersimulator.gitutils")
 
@@ -70,6 +71,7 @@ def load_teams(path,login,nbps,cmd="get_team",filename='tournament.py'):
         #mymod = __import__(login)
         sys.path.insert(0, os.path.join(path, login))
         mymod = __import__(filename[:-3])
+        mymod = importlib.reload(mymod)
     except Exception as e:
         logger.debug(traceback.format_exc())
         logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, e))
