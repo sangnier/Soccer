@@ -58,14 +58,18 @@ def check_team(team):
         return False
     return True
 
-def load_teams(path,login,nbps,cmd="get_team"):
+def load_teams(path,login,nbps,cmd="get_team",filename='tournament.py'):
     mymod = None
-    if not os.path.exists(os.path.join(path,login,"__init__.py")):
-        logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, "__init__.py non trouve"))
+    #if not os.path.exists(os.path.join(path,login,"__init__.py")):
+        #logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, "__init__.py non trouve"))
+    if not os.path.exists(os.path.join(path, login, filename)):
+        logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, filename+" non trouve"))
         return None
     try:
-        sys.path.insert(0, path)
-        mymod = __import__(login)
+        #sys.path.insert(0, path)
+        #mymod = __import__(login)
+        sys.path.insert(0, os.path.join(path, login))
+        mymod = __import__(filename[:-3])
     except Exception as e:
         logger.debug(traceback.format_exc())
         logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, e))
