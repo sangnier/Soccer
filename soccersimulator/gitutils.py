@@ -30,14 +30,14 @@ def dl_from_github(groupe, path):
     shutil.rmtree(tmp_path, ignore_errors=True)
     os.mkdir(tmp_path)
     os.system("git clone https://github.com/%s/%s %s " % (groupe.login, groupe.projet, tmp_path))
-    try:
-        initdir = os.path.abspath(os.path.dirname(sorted(glob.glob(tmp_path+"/**/__init__.py",recursive=True),key=lambda x:len(x))[0]))
-    except Exception:
-           logger.info("Pas de __init__.py trouvé pour %s %s" % (groupe.login,groupe.projet))
-           return
-    if initdir != tmp_path:
-        logger.info("__init__.py pas a la racine, mv %s -- %s" % (initdir,tmp_path))
-        os.system("mv %s %s" %(initdir+"/*",tmp_path+"/"))
+#    try:
+#        initdir = os.path.abspath(os.path.dirname(sorted(glob.glob(tmp_path+"/**/__init__.py",recursive=True),key=lambda x:len(x))[0]))
+#    except Exception:
+#           logger.info("Pas de __init__.py trouvé pour %s %s" % (groupe.login,groupe.projet))
+#           return
+#    if initdir != tmp_path:
+#        logger.info("__init__.py pas a la racine, mv %s -- %s" % (initdir,tmp_path))
+#        os.system("mv %s %s" %(initdir+"/*",tmp_path+"/"))
 
     
 
