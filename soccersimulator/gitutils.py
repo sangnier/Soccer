@@ -67,11 +67,34 @@ def load_teams(path,login,nbps,cmd="get_team",filename='tournament.py'):
         logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, filename+" non trouve"))
         return None
     try:
+        #cpcmd = 'cp init.py {}/__init__.py'.format(os.path.join(path, login))
+        #print(cpcmd)
+        #os.system(cpcmd)
         #sys.path.insert(0, path)
         #mymod = __import__(login)
+
+        # Delete modules in github...
         sys.path.insert(0, os.path.join(path, login))
+        files = [f for f in os.listdir(os.path.join(path, login)) if '.py' not in f and f != 'soccersimulator' and f != '.git' and '.md' not in f and f != '.ipynb_checkpoints' and f != '__pycache__']
+        if not files:
+            logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, "module non trouve"))
+            return None
+        key_del = []
+        for name in files:
+            for key in sys.modules.keys():
+                if name in key:
+            #if name in sys.modules:
+                #del sys.modules[name]
+                    key_del.append(key)
+        for key in key_del:
+            del sys.modules[key]
         mymod = __import__(filename[:-3])
         mymod = importlib.reload(mymod)
+
+        #spec = importlib.util.spec_from_file_location('tournament', os.path.join(path, login, filename))
+        #mymod = importlib.util.module_from_spec(spec)
+        #spec.loader.exec_module(mymod)
+        #print(dir(mymod))
     except Exception as e:
         logger.debug(traceback.format_exc())
         logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, e))
