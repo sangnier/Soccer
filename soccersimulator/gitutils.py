@@ -2,26 +2,30 @@
 
 import os
 import sys
-import imp
+# import imp
 import shutil
-import argparse
-import pickle
+# import argparse
+# import pickle
 from collections import namedtuple
 import traceback
 import logging
 from soccersimulator import SoccerTeam, Strategy, Simulation
-import glob
-import importlib
+# import glob
+# import importlib
 
 logger = logging.getLogger("soccersimulator.gitutils")
 
 MAX_TEST_STEPS = 50
-Groupe = namedtuple("Groupe",["login","projet","noms"])
+Groupe = namedtuple("Groupe",["login","projet","module","noms"])
 
 def dl_from_github(groupe, path):
     path = os.path.abspath(path)
     if type(groupe)==list:
-        for g in groupe: dl_from_github(g,path)
+        for g in groupe:
+            if g.module:
+                dl_from_github(g,path)
+            else:
+                logger.info("\033[93m Module inconnu pour \033[94m%s : \033[91m%s \033[0m" % (g.login, g.projet))
         return
     logger.info("Debut import github %s %s" % (groupe.login, groupe.projet))
     if not os.path.exists(path):
@@ -29,7 +33,10 @@ def dl_from_github(groupe, path):
     tmp_path = os.path.join(path, groupe.login)
     shutil.rmtree(tmp_path, ignore_errors=True)
     os.mkdir(tmp_path)
-    os.system("git clone https://github.com/%s/%s %s " % (groupe.login, groupe.projet, tmp_path))
+    os.system("git clone https://github.com/%s/%s %s 2> /dev/null" % (groupe.login, groupe.projet, tmp_path))
+    os.system("mv %s/%s %s/%s" % (tmp_path, groupe.module, path, 'temp_dir'))
+    os.system("rm -rf %s" % tmp_path)
+    os.system("mv %s/%s %s/%s" % (path, 'temp_dir', path, groupe.module))
 #    try:
 #        initdir = os.path.abspath(os.path.dirname(sorted(glob.glob(tmp_path+"/**/__init__.py",recursive=True),key=lambda x:len(x))[0]))
 #    except Exception:
@@ -59,14 +66,17 @@ def check_team(team):
         return False
     return True
 
-def load_teams(path,login,nbps,cmd="get_team",filename='tournament.py'):
+def load_teams(path,login, nbps,cmd="get_team",filename='tournament.py'):
     mymod = None
-    #if not os.path.exists(os.path.join(path,login,"__init__.py")):
-        #logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, "__init__.py non trouve"))
-    if not os.path.exists(os.path.join(path, login, filename)):
-        logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, filename+" non trouve"))
-        return None
+    if not os.path.exists(os.path.join(path,login,"__init__.py")):
+        logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, "__init__.py non trouve"))
+    # if not os.path.exists(os.path.join(path, login, filename)):
+    #     logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, filename+" non trouve"))
+    #     return None
     try:
+        sys.path.insert(0, path)
+        mymod = __import__(login)
+
         #cpcmd = 'cp init.py {}/__init__.py'.format(os.path.join(path, login))
         #print(cpcmd)
         #os.system(cpcmd)
@@ -74,22 +84,22 @@ def load_teams(path,login,nbps,cmd="get_team",filename='tournament.py'):
         #mymod = __import__(login)
 
         # Delete modules in github...
-        sys.path.insert(0, os.path.join(path, login))
-        files = [f for f in os.listdir(os.path.join(path, login)) if '.py' not in f and f != 'soccersimulator' and f != '.git' and '.md' not in f and f != '.ipynb_checkpoints' and f != '__pycache__']
-        if not files:
-            logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, "module non trouve"))
-            return None
-        key_del = []
-        for name in files:
-            for key in sys.modules.keys():
-                if name in key:
-            #if name in sys.modules:
-                #del sys.modules[name]
-                    key_del.append(key)
-        for key in key_del:
-            del sys.modules[key]
-        mymod = __import__(filename[:-3])
-        mymod = importlib.reload(mymod)
+        # sys.path.insert(0, os.path.join(path, login))
+        # files = [f for f in os.listdir(os.path.join(path, login)) if '.py' not in f and f != 'soccersimulator' and f != '.git' and '.md' not in f and f != '.ipynb_checkpoints' and f != '__pycache__']
+        # if not files:
+        #     logger.info("\033[93m Erreur pour \033[94m%s : \033[91m%s \033[0m" % (login, "module non trouve"))
+        #     return None
+        # key_del = []
+        # for name in files:
+        #     for key in sys.modules.keys():
+        #         if name in key:
+        #     #if name in sys.modules:
+        #         #del sys.modules[name]
+        #             key_del.append(key)
+        # for key in key_del:
+        #     del sys.modules[key]
+        # mymod = __import__(filename[:-3])
+        # mymod = importlib.reload(mymod)
 
         #spec = importlib.util.spec_from_file_location('tournament', os.path.join(path, login, filename))
         #mymod = importlib.util.module_from_spec(spec)
