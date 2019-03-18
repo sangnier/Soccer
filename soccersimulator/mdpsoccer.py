@@ -526,7 +526,8 @@ class Simulation(object):
             self.set_state(self.get_initial_state())
             self.listeners.begin_round(self.team1,self.team2,self.state.copy())
             self.states.append(self.state.copy())
-        self.listeners.begin_round(self.team1,self.team2,self.state.copy())
+        else:  # 03/18 2019
+            self.listeners.begin_round(self.team1,self.team2,self.state.copy())
     def end_round(self):
         self.listeners.end_round(self.team1, self.team2, self.state.copy())
         if not self.stop():
